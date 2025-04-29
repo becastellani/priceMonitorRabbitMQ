@@ -1,0 +1,180 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Sistema de Monitoramento de Preços",
+    "version": "1.0.0",
+    "description": "API para cadastro e listagem de produtos para monitoramento de preços em e-commerces."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/api",
+      "description": "Servidor Local"
+    }
+  ],
+  "paths": {
+    "/product": {
+      "get": {
+        "summary": "Listar produtos",
+        "description": "Lista todos os produtos cadastrados, com paginação, ordenação e links HATEOAS.",
+        "parameters": [
+          {
+            "name": "_page",
+            "in": "query",
+            "description": "Número da página (opcional)",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "_size",
+            "in": "query",
+            "description": "Tamanho da página (quantidade de itens por página, opcional)",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "name": "_sort",
+            "in": "query",
+            "description": "Campo de ordenação (opcional)",
+            "schema": {
+              "type": "string",
+              "default": "name"
+            }
+          },
+          {
+            "name": "_order",
+            "in": "query",
+            "description": "Ordem de ordenação: ascendente (asc) ou descendente (desc)",
+            "schema": {
+              "type": "string",
+              "enum": ["asc", "desc"],
+              "default": "asc"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de produtos retornada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductListResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno no servidor"
+          }
+        }
+      },
+      "post": {
+        "summary": "Criar novo produto",
+        "description": "Cria um novo produto para monitoramento de preços e publica no sistema de filas.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Product"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Produto criado com sucesso"
+          },
+          "400": {
+            "description": "Erro de validação"
+          },
+          "500": {
+            "description": "Erro interno no servidor"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Product": {
+        "type": "object",
+        "required": ["name", "price", "category", "stock", "ecommerce"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Smartphone Samsung Galaxy S21"
+          },
+          "price": {
+            "type": "number",
+            "example": 3500.00
+          },
+          "category": {
+            "type": "string",
+            "example": "Eletrônicos"
+          },
+          "stock": {
+            "type": "integer",
+            "example": 20
+          },
+          "ecommerce": {
+            "type": "string",
+            "example": "Amazon"
+          },
+          "url": {
+            "type": "string",
+            "example": "https://www.amazon.com.br/dp/B08N5WRWNW"
+          }
+        }
+      },
+      "ProductListResponse": {
+        "type": "object",
+        "properties": {
+          "products": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Product"
+            }
+          },
+          "_page": {
+            "type": "object",
+            "properties": {
+              "current": {
+                "type": "integer",
+                "example": 1
+              },
+              "total": {
+                "type": "integer",
+                "example": 5
+              },
+              "size": {
+                "type": "integer",
+                "example": 10
+              }
+            }
+          },
+          "_links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "rel": {
+                  "type": "string"
+                },
+                "href": {
+                  "type": "string"
+                },
+                "method": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
